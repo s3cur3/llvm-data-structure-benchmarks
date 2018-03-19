@@ -92,7 +92,7 @@ const vector<int> & randomize_lookup_indices(int size);
 			benchmark::ClobberMemory();
 		}
 	}
-	BENCHMARK_TEMPLATES_5(BM_vector_sequential_read, FixedArray, vector, SmallVec8, SmallVec16, SmallVec1024);
+	BENCHMARK_TEMPLATES_5(BM_vector_sequential_read, vector, SmallVec8, SmallVec16, SmallVec1024, FixedArray);
 
 	template<class ContainerT, class ValueT>
 	void BM_vector_rand_read(benchmark::State& state) {
