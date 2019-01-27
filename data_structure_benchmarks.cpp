@@ -10,8 +10,6 @@
 #include "data_types.h"
 #include "ArrayTypes.h"
 
-using namespace std;
-
 static inline int rand(int min, int max) { return min + rand() % (max - min + 1); }
 
 #define BENCHMARK_VECTORS 1
@@ -49,7 +47,7 @@ static inline int rand(int min, int max) { return min + rand() % (max - min + 1)
  * (You wouldn't want the randomized indices to change between different containers, lest you get
  * really lucky with one container and really unlucky with another.)
  */
-const vector<int> & randomize_lookup_indices(int size);
+const std::vector<int> & randomize_lookup_indices(size_t size);
 
 #if BENCHMARK_VECTORS
 	template <typename Data> using SmallVec8    = llvm::SmallVector<Data, 8>;
@@ -74,7 +72,7 @@ const vector<int> & randomize_lookup_indices(int size);
 
 	template<class ContainerT, class ValueT>
 	void BM_vector_sequential_read(benchmark::State& state) {
-		vector<ValueT> client;
+		std::vector<ValueT> client;
 		client.reserve(state.range(0));
 		for(int i = 0; i < state.range(0); ++i)
 		{
@@ -92,18 +90,18 @@ const vector<int> & randomize_lookup_indices(int size);
 			benchmark::ClobberMemory();
 		}
 	}
-	BENCHMARK_TEMPLATES_5(BM_vector_sequential_read, vector, SmallVec8, SmallVec16, SmallVec1024, FixedArray);
+	BENCHMARK_TEMPLATES_5(BM_vector_sequential_read, std::vector, SmallVec8, SmallVec16, SmallVec1024, FixedArray);
 
 	template<class ContainerT, class ValueT>
 	void BM_vector_rand_read(benchmark::State& state) {
-		vector<ValueT> client;
+		std::vector<ValueT> client;
 		client.reserve(state.range(0));
 		for(int i = 0; i < state.range(0); ++i)
 		{
 			client.emplace_back(generate_value<ValueT>(i));
 		}
 
-		const vector<int> &indices_to_lookup = randomize_lookup_indices(state.range(0));
+		const std::vector<int> &indices_to_lookup = randomize_lookup_indices(state.range(0));
 
 		ContainerT container(client.begin(), client.end());
 		ValueT val;
@@ -116,13 +114,13 @@ const vector<int> & randomize_lookup_indices(int size);
 			benchmark::ClobberMemory();
 		}
 	}
-	BENCHMARK_TEMPLATES_5(BM_vector_rand_read, vector, SmallVec8, SmallVec16, SmallVec1024, FixedArray);
+	BENCHMARK_TEMPLATES_5(BM_vector_rand_read, std::vector, SmallVec8, SmallVec16, SmallVec1024, FixedArray);
 #endif // BENCHMARK_VECTORS
 
 
 #if BENCHMARK_MAPS
-	template <typename Data> using ptr_map = map<intptr_t, Data>;
-	template <typename Data> using ptr_unordered_map = unordered_map<intptr_t, Data>;
+	template <typename Data> using ptr_map = std::map<intptr_t, Data>;
+	template <typename Data> using ptr_unordered_map = std::unordered_map<intptr_t, Data>;
 	template <typename Data> using ptr_dense_map = llvm::DenseMap<intptr_t, Data>;
 	template <typename Data> using ptr_array_map = ArrayMap<intptr_t, Data>;
 
@@ -142,13 +140,13 @@ const vector<int> & randomize_lookup_indices(int size);
 
 	template<class ContainerT, class ValueT>
 	void BM_map_lookup(benchmark::State &state) {
-		map<intptr_t, ValueT> client;
+		std::map<intptr_t, ValueT> client;
 		for(int i = 0; i < state.range(0); ++i)
 		{
 			client[i] = generate_value<ValueT>(i);
 		}
 
-		const vector<int> keys_to_lookup = randomize_lookup_indices(state.range(0));
+		const std::vector<int> &keys_to_lookup = randomize_lookup_indices(state.range(0));
 
 		ContainerT container(client.begin(), client.end());
 		benchmark::ClobberMemory();
@@ -181,13 +179,13 @@ void BM_set_insert(benchmark::State &state) {
 		benchmark::ClobberMemory();
 	}
 }
-BENCHMARK_TEMPLATES_3(BM_set_insert, set, sm_set8, sm_set16);
+BENCHMARK_TEMPLATES_3(BM_set_insert, std::set, sm_set8, sm_set16);
 
 template<class ContainerT, class ValueT>
 void BM_set_read(benchmark::State& state) {
-	vector<ValueT> vals_to_lookup;
+	std::vector<ValueT> vals_to_lookup;
 	vals_to_lookup.reserve(state.range(0));
-	set<ValueT> client;
+	std::set<ValueT> client;
 	for(int i = 0; i < state.range(0); ++i)
 	{
 		client.insert(generate_value<ValueT>(i));
@@ -206,7 +204,7 @@ void BM_set_read(benchmark::State& state) {
 		benchmark::ClobberMemory();
 	}
 }
-BENCHMARK_TEMPLATES_4(BM_set_read, set, sm_set8, sm_set16, ArraySet);
+BENCHMARK_TEMPLATES_4(BM_set_read, std::set, sm_set8, sm_set16, ArraySet);
 #endif // BENCHMARK_SETS
 
 
@@ -220,14 +218,14 @@ BENCHMARK_MAIN();
 
 
 
-const vector<int> & randomize_lookup_indices(int size)
+const std::vector<int> & randomize_lookup_indices(size_t size)
 {
-	static llvm::DenseMap<int, vector<int>> s_existing_orderings;
+	static llvm::DenseMap<int, std::vector<int>> s_existing_orderings;
 
 	auto it = s_existing_orderings.find(size);
 	if(it == s_existing_orderings.end())
 	{
-		vector<int> new_ordering;
+		std::vector<int> new_ordering;
 		new_ordering.reserve(size);
 		for(int i = 0; i < size; ++i)
 		{
