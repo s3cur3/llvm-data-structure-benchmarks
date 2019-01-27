@@ -54,12 +54,20 @@ public:
 	template<class It> void replace(It begin, It end)              { replace(begin, end, end - begin); }
 	template<class It> void replace(It begin, It end, size_t size)
 	{
-		clear();
+		for(T * next = m_begin; next < m_end; ++next)
+		{
+			next->~T(); // make sure we call the destructor!
+		}
 
 		if(size > 0)
 		{
-			m_begin = (T *)malloc(size * sizeof(T));
-			m_end = m_begin + size;
+			if(size != (m_end - m_begin)) // need to allocate a new buffer
+			{
+				free(m_begin);
+				m_begin = (T *)malloc(size * sizeof(T));
+				m_end = m_begin + size;
+			}
+
 			T * next = m_begin;
 			while(begin != end)
 			{
@@ -68,17 +76,22 @@ public:
 				++next;
 			}
 		}
+		else
+		{
+			m_begin = nullptr;
+			m_end = nullptr;
+		}
 	}
 
 protected:
 	void clear()
 	{
-		for(auto * next = m_begin; next < m_end; ++next)
-		{
-			next->~T(); // make sure we call the destructor!
-		}
 		if(m_begin)
 		{
+			for(T * next = m_begin; next < m_end; ++next)
+			{
+				next->~T(); // make sure we call the destructor!
+			}
 			free(m_begin);
 		}
 		m_begin = nullptr;
