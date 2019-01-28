@@ -14,3 +14,5 @@ find_library(GOOGLE_BENCHMARK benchmark)
 target_link_libraries(llvm_data_structure_benchmarks
 		${GOOGLE_BENCHMARK})
 
+target_compile_options(llvm_data_structure_benchmarks PRIVATE
+		-march=haswell) # May want to try with -march=native as well
