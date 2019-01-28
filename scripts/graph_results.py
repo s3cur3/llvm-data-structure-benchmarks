@@ -55,7 +55,7 @@ def read_benchmark_results(file_path, min_elements=None, max_elements=None):
     # Group 5: clock time in ns
     # Group 6: CPU time in ns
     # Group 7: iteration count
-    benchmark_re = re.compile(r"^(\w+)<([\w<>, ]+), (\w+)>\/(\d+)\s+(\d+) ns\s+(\d+) ns\s+(\d+)$")
+    benchmark_re = re.compile(r"^(\w+)<([\w<>:, ]+), (\w+)>\/(\d+)\s+(\d+) ns\s+(\d+) ns\s+(\d+)$")
 
     data = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(int))))
     data_sizes = set()
