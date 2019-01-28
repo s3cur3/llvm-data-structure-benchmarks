@@ -18,9 +18,9 @@ static inline int rand(int min, int max) { return min + rand() % (max - min + 1)
 
 
 #define DO_BENCHMARK_TEMPLATE(bm_function, container) \
-		BENCHMARK_TEMPLATE(bm_function, container<int>,     int    )->Arg(4)->Arg(8)->Arg(16)->Arg(32)->Arg(64)->Arg(256)->Arg(1024)->Arg(4096)->Arg(16384); \
-		BENCHMARK_TEMPLATE(bm_function, container<size_16>, size_16)->Arg(4)->Arg(8)->Arg(16)->Arg(32)->Arg(64)->Arg(256)->Arg(1024)->Arg(4096)->Arg(16384); \
-		BENCHMARK_TEMPLATE(bm_function, container<size_64>, size_64)->Arg(4)->Arg(8)->Arg(16)->Arg(32)->Arg(64)->Arg(256)->Arg(1024)->Arg(4096)->Arg(16384);
+		BENCHMARK_TEMPLATE(bm_function, container<int>,     int    )->Arg(4)->Arg(8)->Arg(16)->Arg(32)->Arg(64)->Arg(128)->Arg(256)->Arg(512)->Arg(1024)->Arg(2048)->Arg(4096)->Arg(8192)->Arg(16384); \
+		BENCHMARK_TEMPLATE(bm_function, container<size_16>, size_16)->Arg(4)->Arg(8)->Arg(16)->Arg(32)->Arg(64)->Arg(128)->Arg(256)->Arg(512)->Arg(1024)->Arg(2048)->Arg(4096)->Arg(8192)->Arg(16384); \
+		BENCHMARK_TEMPLATE(bm_function, container<size_64>, size_64)->Arg(4)->Arg(8)->Arg(16)->Arg(32)->Arg(64)->Arg(128)->Arg(256)->Arg(512)->Arg(1024)->Arg(2048)->Arg(4096)->Arg(8192)->Arg(16384);
 
 #define BENCHMARK_TEMPLATES_3(bm_function, container0, container1, container2) \
 		DO_BENCHMARK_TEMPLATE(bm_function, container0); \
