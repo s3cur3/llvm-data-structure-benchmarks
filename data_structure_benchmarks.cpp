@@ -53,6 +53,7 @@ const std::vector<int> & randomize_lookup_indices(size_t size);
 	template <typename Data> using SmallVec8    = llvm::SmallVector<Data, 8>;
 	template <typename Data> using SmallVec16   = llvm::SmallVector<Data, 16>;
 	template <typename Data> using SmallVec1024 = llvm::SmallVector<Data, 1024>;
+	template <typename Data> using FixedArray = data_structure_benchmark::FixedArray<Data>;
 
 	template<class ContainerT, class ValueT>
 	void BM_vector_emplace_back(benchmark::State &state) {
@@ -119,10 +120,10 @@ const std::vector<int> & randomize_lookup_indices(size_t size);
 
 
 #if BENCHMARK_MAPS
-	template <typename Data> using ptr_map = std::map<intptr_t, Data>;
-	template <typename Data> using ptr_unordered_map = std::unordered_map<intptr_t, Data>;
-	template <typename Data> using ptr_dense_map = llvm::DenseMap<intptr_t, Data>;
-	template <typename Data> using ptr_array_map = ArrayMap<intptr_t, Data>;
+	template <typename Data> using std_map = std::map<intptr_t, Data>;
+	template <typename Data> using std_unordered_map = std::unordered_map<intptr_t, Data>;
+	template <typename Data> using DenseMap = llvm::DenseMap<intptr_t, Data>;
+	template <typename Data> using ArrayMap = data_structure_benchmark::ArrayMap<intptr_t, Data>;
 
 	template<class ContainerT, class ValueT>
 	void BM_map_insert(benchmark::State &state) {
@@ -136,7 +137,7 @@ const std::vector<int> & randomize_lookup_indices(size_t size);
 			benchmark::ClobberMemory();
 		}
 	}
-	BENCHMARK_TEMPLATES_3(BM_map_insert, ptr_map, ptr_unordered_map, ptr_dense_map);
+	BENCHMARK_TEMPLATES_3(BM_map_insert, std_map, std_unordered_map, DenseMap);
 
 	template<class ContainerT, class ValueT>
 	void BM_map_lookup(benchmark::State &state) {
@@ -160,12 +161,13 @@ const std::vector<int> & randomize_lookup_indices(size_t size);
 			benchmark::ClobberMemory();
 		}
 	}
-	BENCHMARK_TEMPLATES_4(BM_map_lookup, ptr_map, ptr_unordered_map, ptr_dense_map, ptr_array_map);
+	BENCHMARK_TEMPLATES_4(BM_map_lookup, std_map, std_unordered_map, DenseMap, ArrayMap);
 #endif // BENCHMARK_MAPS
 
 #if BENCHMARK_SETS
-template <typename Data> using sm_set8 = llvm::SmallSet<Data, 8>;
-template <typename Data> using sm_set16 = llvm::SmallSet<Data, 16>;
+template <typename Data> using SmallSet8 = llvm::SmallSet<Data, 8>;
+template <typename Data> using SmallSet16 = llvm::SmallSet<Data, 16>;
+template <typename Data> using ArraySet = data_structure_benchmark::ArraySet<Data>;
 
 template<class ContainerT, class ValueT>
 void BM_set_insert(benchmark::State &state) {
@@ -179,7 +181,7 @@ void BM_set_insert(benchmark::State &state) {
 		benchmark::ClobberMemory();
 	}
 }
-BENCHMARK_TEMPLATES_3(BM_set_insert, std::set, sm_set8, sm_set16);
+BENCHMARK_TEMPLATES_3(BM_set_insert, std::set, SmallSet8, SmallSet16);
 
 template<class ContainerT, class ValueT>
 void BM_set_read(benchmark::State& state) {
@@ -204,7 +206,7 @@ void BM_set_read(benchmark::State& state) {
 		benchmark::ClobberMemory();
 	}
 }
-BENCHMARK_TEMPLATES_4(BM_set_read, std::set, sm_set8, sm_set16, ArraySet);
+BENCHMARK_TEMPLATES_4(BM_set_read, std::set, SmallSet8, SmallSet16, ArraySet);
 #endif // BENCHMARK_SETS
 
 

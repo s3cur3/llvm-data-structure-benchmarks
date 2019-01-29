@@ -16,13 +16,14 @@ def main():
     argparser.add_argument('--max_elements', type=int, default=0, help='The maximum container size to graph; 0 for no maximum')
     args = argparser.parse_args()
 
-    results = read_benchmark_results(args.file, args.min_elements, args.max_elements)
+    with open(args.file) as out_file:
+        results = parse_benchmark_results(out_file.readlines(), args.min_elements, args.max_elements)
     graph_results(results, 'out')
 
 
-def read_benchmark_results(file_path, min_elements=None, max_elements=None):
+def parse_benchmark_results(benchmark_output, min_elements=None, max_elements=None):
     """
-    :type file_path str
+    :type benchmark_output list[str]
     :type min_elements int|None
     :type max_elements int|None
     :rtype BenchmarkResults
@@ -61,21 +62,23 @@ def read_benchmark_results(file_path, min_elements=None, max_elements=None):
     data_sizes = set()
     cardinalities = set()
 
-    with open(file_path) as input:
-        for line in input:
-            match = benchmark_re.match(line)
-            if match:
-                benchmark_fn = match.group(1)
-                container_type = match.group(2)
-                data_size = data_type_to_size(match.group(3))
-                num_elements = int(match.group(4))
-                cpu_time = int(match.group(6))
-                meets_min_requirements = not min_elements or num_elements >= min_elements
-                meets_max_requirements = not max_elements or num_elements <= max_elements
-                if meets_min_requirements and meets_max_requirements:
-                    data[benchmark_fn][data_size][container_type][num_elements] = cpu_time
-                    data_sizes.add(data_size)
-                    cardinalities.add(num_elements)
+    for line in benchmark_output:
+        match = benchmark_re.match(line)
+        if match:
+            benchmark_fn = match.group(1)
+            container_type = match.group(2)
+            if container_type.startswith('std_'):
+                container_type = container_type.replace('std_', 'std::')
+
+            data_size = data_type_to_size(match.group(3))
+            num_elements = int(match.group(4))
+            cpu_time = int(match.group(6))
+            meets_min_requirements = not min_elements or num_elements >= min_elements
+            meets_max_requirements = not max_elements or num_elements <= max_elements
+            if meets_min_requirements and meets_max_requirements:
+                data[benchmark_fn][data_size][container_type][num_elements] = cpu_time
+                data_sizes.add(data_size)
+                cardinalities.add(num_elements)
     return BenchmarkResults(data=data, sizes_in_bytes=sorted(data_sizes), cardinalities=sorted(cardinalities))
 
 

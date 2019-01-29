@@ -19,6 +19,8 @@
 #include <utility> // for std::pair
 #include <initializer_list>
 
+namespace data_structure_benchmark {
+
 // NOTE: This is *not* a full implementation of the read-only portion of the std::vector API.
 //       If you drop it in to production code, you'll probably have to add stuff.
 //       The good news is, the implementation is simple, so doing so should be straightforward!
@@ -172,5 +174,7 @@ public:
 	template<typename It>
 	void replace(It begin, It end) { base_type::replace(begin, end); std::sort(base_type::begin(), base_type::end());	}
 };
+
+} // namespace
 
 #endif //LLVM_DATA_STRUCTURE_BENCHMARKS_ARRAYTYPES_H
