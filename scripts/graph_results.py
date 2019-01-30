@@ -87,6 +87,25 @@ def graph_results(benchmark_results, out_dir):
     :type benchmark_results: BenchmarkResults
     :type out_dir str
     """
+    def name_file(benchmark_function_name, data_size, max_container_size):
+        type = None
+        for potential_type in ['vector', 'set', 'map']:
+            if ("_%s_" % potential_type) in benchmark_function_name:
+                type = potential_type
+                break
+
+        op_decoder = {
+            'rand_read': 'Random reads',
+            'sequential_read': 'Sequential reads',
+            'insert': 'Insertion',
+            'lookup': 'Random lookup',
+            'set_read': 'Random lookup',
+        }
+        for function_partial_name, decoded in op_decoder.items():
+            if function_partial_name in benchmark_function_name:
+                return "%s in %ss up to %d elements (%d byte data).png" % (decoded, type, max_container_size, data_size)
+        return "%s_data_size_%d.png" % (benchmark_fn, data_size)
+
     try:
         os.makedirs(out_dir)
     except os.error:
@@ -95,11 +114,13 @@ def graph_results(benchmark_results, out_dir):
     for benchmark_fn, data_sizes_for_fn in benchmark_results.data.items():
         for data_size, container_types_at_size in data_sizes_for_fn.items():
             # Make a graph of the time required of each container type with this data size and any number of elements
+            max_cardinality = 0
             traces = []
             for container_type, num_elements_for_container in container_types_at_size.items():
                 times = []  # CPU time in nanoseconds
                 for cardinality in benchmark_results.cardinalities:
                     times.append(num_elements_for_container[cardinality])
+                    max_cardinality = max(max_cardinality, cardinality)
                 traces.append(plotly.graph_objs.Scatter(
                     x=benchmark_results.cardinalities,
                     y=times,
@@ -115,7 +136,8 @@ def graph_results(benchmark_results, out_dir):
             # plotly.offline.plot(figure,
             #                     filename="%s_data_size_%d.html" % (benchmark_fn, data_size),
             #                     auto_open=False)
-            plotly.io.write_image(figure, os.path.join(out_dir, "%s_data_size_%d.png" % (benchmark_fn, data_size)))
+            plotly.io.write_image(figure, os.path.join(out_dir,
+                                                       name_file(benchmark_fn, data_size, max_cardinality)))
 
         # We need separate graphs by container size.
         # E.g., if you know your container will have 8 elements, here's the fastest container for iteration.
