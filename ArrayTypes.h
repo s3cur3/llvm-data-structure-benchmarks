@@ -73,7 +73,7 @@ public:
 			T * next = m_begin;
 			while(begin != end)
 			{
-				*next = std::move(*begin);
+				new (next) T(std::move(*begin));
 				++begin;
 				++next;
 			}
