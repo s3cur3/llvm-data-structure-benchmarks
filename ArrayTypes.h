@@ -19,7 +19,7 @@
 #include <utility> // for std::pair
 #include <initializer_list>
 
-namespace data_structure_benchmark {
+namespace FixedMaps {
 
 // NOTE: This is *not* a full implementation of the read-only portion of the std::vector API.
 //       If you drop it in to production code, you'll probably have to add stuff.
