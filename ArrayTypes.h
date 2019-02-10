@@ -37,6 +37,8 @@ public:
 	                            FixedArray(std::initializer_list<T> l)          : m_begin(nullptr), m_end(nullptr) { replace(l.begin(), l.end()); }
 	template<class FwdIt>       FixedArray(FwdIt begin, FwdIt end, size_t size) : m_begin(nullptr), m_end(nullptr) { replace(begin, end, size); }
 	template<class RndAccessIt> FixedArray(RndAccessIt begin, RndAccessIt end)  : m_begin(nullptr), m_end(nullptr) { replace(begin, end); }
+	                            FixedArray(                          )          : m_begin(nullptr), m_end(nullptr) {                              }
+
 
 	~FixedArray()                                 { clear(); }
 
@@ -53,7 +55,7 @@ public:
 	size_t size() const                           { return m_end - m_begin; }
 	bool   empty() const                          { return m_end == m_begin; }
 
-	template<class RndAccessIt> void replace(RndAccessIt begin, RndAccessIt end)              { replace(begin, end, end - begin); }
+	template<class RndAccessIt> void replace(RndAccessIt begin, RndAccessIt end)              { replace(begin, end, std::distance(begin, end)); }
 	template<class It>          void replace(It          begin, It          end, size_t size)
 	{
 		for(T * next = m_begin; next < m_end; ++next)
