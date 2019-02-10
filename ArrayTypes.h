@@ -85,7 +85,6 @@ public:
 		}
 	}
 
-protected:
 	void clear()
 	{
 		if(m_begin)
@@ -139,7 +138,7 @@ public:
 	                            ArrayMap(std::initializer_list<value_type> l) : base_type(l.begin(), l.end())                          { std::sort(base_type::begin(), base_type::end()); }
 	template<class FwdIt>       ArrayMap(FwdIt begin, FwdIt end)              : base_type(begin, end, compute_fwd_it_dist(begin, end)) { std::sort(base_type::begin(), base_type::end()); }
 	                            ArrayMap(std::map<KeyT, ValueT> &m)           : base_type(m.begin(), m.end(), m.size())                { std::sort(base_type::begin(), base_type::end()); }
-
+	ArrayMap()                                        {}
 	~ArrayMap()                                       { base_type::clear(); }
 
 	template<class TContainer>
@@ -152,7 +151,7 @@ public:
 	const ValueT & operator[](const KeyT &key) const  { assert(find(key) != base_type::end()); return find(key)->second; }
 
 	template<class It>
-	void replace(It begin, It end) { base_type::replace(begin, end); std::sort(begin(), end()); }
+	void replace(It begin, It end) { base_type::replace(begin, end); std::sort(base_type::begin(), base_type::end()); }
 };
 
 
