@@ -154,6 +154,40 @@ public:
 	void replace(It begin, It end) { base_type::replace(begin, end); std::sort(base_type::begin(), base_type::end()); }
 };
 
+template<class KeyT, class ValueT>
+class ArrayMultiMap : public ArrayMap<KeyT, ValueT>
+{
+public:
+	using typename ArrayMap<KeyT, ValueT>::value_type;
+	using typename ArrayMap<KeyT, ValueT>::base_type;
+	using typename ArrayMap<KeyT, ValueT>::iterator;
+	using typename ArrayMap<KeyT, ValueT>::const_iterator;
+	using ArrayMap<KeyT, ValueT>::find;
+	using ArrayMap<KeyT, ValueT>::clear;
+	using ArrayMap<KeyT, ValueT>::at;
+	using ArrayMap<KeyT, ValueT>::operator[];
+
+	template<class TContainer>  ArrayMultiMap(TContainer &container)    			: ArrayMap<KeyT, ValueT>(container.begin(), container.end()) {}
+	                            ArrayMultiMap(std::initializer_list<value_type> l)	: ArrayMap<KeyT, ValueT>(l.begin(), l.end()) {}
+	template<class FwdIt>       ArrayMultiMap(FwdIt begin, FwdIt end)          		: ArrayMap<KeyT, ValueT>(begin, end) {}
+	                            ArrayMultiMap(std::multimap<KeyT, ValueT> &m) 		: ArrayMap<KeyT, ValueT>(m.begin(), m.end()) {}
+	                            ArrayMultiMap()       {}
+	~ArrayMultiMap()                                  { clear(); }
+
+	template<class TContainer>
+	ArrayMultiMap & operator=(const TContainer &rhs)  { replace(rhs.begin(), rhs.end()); return *this; }
+
+	size_t         count(const KeyT &key) const       { auto r = std::equal_range(base_type::begin(), base_type::end(), key, pair_sort_first_functor<value_type>()); return std::distance(r.first, r.second); }
+	iterator       lower_bound( const KeyT &key)      { return find(key); }
+	const_iterator lower_bound( const KeyT &key) const{ return find(key); }
+	iterator       upper_bound( const KeyT &key)      { auto u = std::upper_bound(base_type::begin(), base_type::end(), key, pair_sort_first_functor<value_type>()); return (u == base_type::end() || (u-1)->first != key) ? base_type::end() : u; }
+	const_iterator upper_bound( const KeyT &key) const{ auto u = std::upper_bound(base_type::begin(), base_type::end(), key, pair_sort_first_functor<value_type>()); return (u == base_type::end() || (u-1)->first != key) ? base_type::end() : u; }
+	std::pair<iterator, iterator>
+				   equal_range( const KeyT &key)      { return std::make_pair(lower_bound(key), upper_bound(key)); }
+	std::pair<const_iterator, const_iterator>
+				   equal_range( const KeyT &key) const{ return std::make_pair(lower_bound(key), upper_bound(key)); }
+
+};
 
 template <typename T>
 class ArraySet : public FixedArray<T>
