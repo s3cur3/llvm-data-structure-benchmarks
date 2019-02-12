@@ -53,7 +53,7 @@ const std::vector<int> & randomize_lookup_indices(size_t size);
 	template <typename Data> using SmallVec8    = llvm::SmallVector<Data, 8>;
 	template <typename Data> using SmallVec16   = llvm::SmallVector<Data, 16>;
 	template <typename Data> using SmallVec1024 = llvm::SmallVector<Data, 1024>;
-	template <typename Data> using FixedArray = data_structure_benchmark::FixedArray<Data>;
+	template <typename Data> using FixedArray = FixedMaps::FixedArray<Data>;
 
 	template<class ContainerT, class ValueT>
 	void BM_vector_emplace_back(benchmark::State &state) {
@@ -123,7 +123,7 @@ const std::vector<int> & randomize_lookup_indices(size_t size);
 	template <typename Data> using std_map = std::map<intptr_t, Data>;
 	template <typename Data> using std_unordered_map = std::unordered_map<intptr_t, Data>;
 	template <typename Data> using DenseMap = llvm::DenseMap<intptr_t, Data>;
-	template <typename Data> using ArrayMap = data_structure_benchmark::ArrayMap<intptr_t, Data>;
+	template <typename Data> using ArrayMap = FixedMaps::ArrayMap<intptr_t, Data>;
 
 	template<class ContainerT, class ValueT>
 	void BM_map_insert(benchmark::State &state) {
@@ -167,7 +167,7 @@ const std::vector<int> & randomize_lookup_indices(size_t size);
 #if BENCHMARK_SETS
 template <typename Data> using SmallSet8 = llvm::SmallSet<Data, 8>;
 template <typename Data> using SmallSet16 = llvm::SmallSet<Data, 16>;
-template <typename Data> using ArraySet = data_structure_benchmark::ArraySet<Data>;
+template <typename Data> using ArraySet = FixedMaps::ArraySet<Data>;
 
 template<class ContainerT, class ValueT>
 void BM_set_insert(benchmark::State &state) {

@@ -19,7 +19,7 @@
 #include <utility> // for std::pair
 #include <initializer_list>
 
-namespace data_structure_benchmark {
+namespace FixedMaps {
 
 // NOTE: This is *not* a full implementation of the read-only portion of the std::vector API.
 //       If you drop it in to production code, you'll probably have to add stuff.
@@ -37,6 +37,8 @@ public:
 	                            FixedArray(std::initializer_list<T> l)          : m_begin(nullptr), m_end(nullptr) { replace(l.begin(), l.end()); }
 	template<class FwdIt>       FixedArray(FwdIt begin, FwdIt end, size_t size) : m_begin(nullptr), m_end(nullptr) { replace(begin, end, size); }
 	template<class RndAccessIt> FixedArray(RndAccessIt begin, RndAccessIt end)  : m_begin(nullptr), m_end(nullptr) { replace(begin, end); }
+	                            FixedArray(                          )          : m_begin(nullptr), m_end(nullptr) {                              }
+
 
 	~FixedArray()                                 { clear(); }
 
@@ -53,7 +55,7 @@ public:
 	size_t size() const                           { return m_end - m_begin; }
 	bool   empty() const                          { return m_end == m_begin; }
 
-	template<class RndAccessIt> void replace(RndAccessIt begin, RndAccessIt end)              { replace(begin, end, end - begin); }
+	template<class RndAccessIt> void replace(RndAccessIt begin, RndAccessIt end)              { replace(begin, end, std::distance(begin, end)); }
 	template<class It>          void replace(It          begin, It          end, size_t size)
 	{
 		for(T * next = m_begin; next < m_end; ++next)
@@ -73,7 +75,7 @@ public:
 			T * next = m_begin;
 			while(begin != end)
 			{
-				*next = std::move(*begin);
+				new (next) T(std::move(*begin));
 				++begin;
 				++next;
 			}
@@ -85,7 +87,6 @@ public:
 		}
 	}
 
-protected:
 	void clear()
 	{
 		if(m_begin)
@@ -139,7 +140,7 @@ public:
 	                            ArrayMap(std::initializer_list<value_type> l) : base_type(l.begin(), l.end())                          { std::sort(base_type::begin(), base_type::end()); }
 	template<class FwdIt>       ArrayMap(FwdIt begin, FwdIt end)              : base_type(begin, end, compute_fwd_it_dist(begin, end)) { std::sort(base_type::begin(), base_type::end()); }
 	                            ArrayMap(std::map<KeyT, ValueT> &m)           : base_type(m.begin(), m.end(), m.size())                { std::sort(base_type::begin(), base_type::end()); }
-
+	ArrayMap()                                        {}
 	~ArrayMap()                                       { base_type::clear(); }
 
 	template<class TContainer>
@@ -152,9 +153,43 @@ public:
 	const ValueT & operator[](const KeyT &key) const  { assert(find(key) != base_type::end()); return find(key)->second; }
 
 	template<class It>
-	void replace(It begin, It end) { base_type::replace(begin, end); std::sort(begin(), end()); }
+	void replace(It begin, It end) { base_type::replace(begin, end); std::sort(base_type::begin(), base_type::end()); }
 };
 
+template<class KeyT, class ValueT>
+class ArrayMultiMap : public ArrayMap<KeyT, ValueT>
+{
+public:
+	using typename ArrayMap<KeyT, ValueT>::value_type;
+	using typename ArrayMap<KeyT, ValueT>::base_type;
+	using typename ArrayMap<KeyT, ValueT>::iterator;
+	using typename ArrayMap<KeyT, ValueT>::const_iterator;
+	using ArrayMap<KeyT, ValueT>::find;
+	using ArrayMap<KeyT, ValueT>::clear;
+	using ArrayMap<KeyT, ValueT>::at;
+	using ArrayMap<KeyT, ValueT>::operator[];
+
+	template<class TContainer>  ArrayMultiMap(TContainer &container)    			: ArrayMap<KeyT, ValueT>(container.begin(), container.end()) {}
+	                            ArrayMultiMap(std::initializer_list<value_type> l)	: ArrayMap<KeyT, ValueT>(l.begin(), l.end()) {}
+	template<class FwdIt>       ArrayMultiMap(FwdIt begin, FwdIt end)          		: ArrayMap<KeyT, ValueT>(begin, end) {}
+	                            ArrayMultiMap(std::multimap<KeyT, ValueT> &m) 		: ArrayMap<KeyT, ValueT>(m.begin(), m.end()) {}
+	                            ArrayMultiMap()       {}
+	~ArrayMultiMap()                                  { clear(); }
+
+	template<class TContainer>
+	ArrayMultiMap & operator=(const TContainer &rhs)  { replace(rhs.begin(), rhs.end()); return *this; }
+
+	size_t         count(const KeyT &key) const       { auto r = std::equal_range(base_type::begin(), base_type::end(), key, pair_sort_first_functor<value_type>()); return std::distance(r.first, r.second); }
+	iterator       lower_bound( const KeyT &key)      { return find(key); }
+	const_iterator lower_bound( const KeyT &key) const{ return find(key); }
+	iterator       upper_bound( const KeyT &key)      { auto u = std::upper_bound(base_type::begin(), base_type::end(), key, pair_sort_first_functor<value_type>()); return (u == base_type::end() || (u-1)->first != key) ? base_type::end() : u; }
+	const_iterator upper_bound( const KeyT &key) const{ auto u = std::upper_bound(base_type::begin(), base_type::end(), key, pair_sort_first_functor<value_type>()); return (u == base_type::end() || (u-1)->first != key) ? base_type::end() : u; }
+	std::pair<iterator, iterator>
+				   equal_range( const KeyT &key)      { return std::make_pair(lower_bound(key), upper_bound(key)); }
+	std::pair<const_iterator, const_iterator>
+				   equal_range( const KeyT &key) const{ return std::make_pair(lower_bound(key), upper_bound(key)); }
+
+};
 
 template <typename T>
 class ArraySet : public FixedArray<T>
